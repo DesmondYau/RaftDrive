@@ -1,0 +1,51 @@
+syntax = "proto3";
+package kvstore;
+
+message GetRequest {
+   string key = 1;
+}
+
+message GetResponse {
+    string value = 1;
+    enum Status {
+        OK           = 0;
+        NOT_FOUND    = 1;
+        UNAVAILABLE  = 2;
+        WRONG_LEADER = 3;
+    }
+    Status status = 2;
+}
+
+message PutRequest {
+    string key   = 1;
+    string value = 2;
+}
+
+message PutResponse {
+    enum Status {
+        OK           = 0;
+        WRONG_LEADER = 1;
+        UNAVAILABLE  = 2;
+    }
+    Status status = 1;
+}
+
+message AppendRequest {
+    string key   = 1;
+    string value = 2;
+}
+
+message AppendResponse {
+    enum Status {
+        OK           = 0;
+        WRONG_LEADER = 1;
+        UNAVAILABLE  = 2;
+    }
+    Status status = 1;
+}
+
+service KVStore {
+    rpc Get(GetRequest)       returns (GetResponse);
+    rpc Put(PutRequest)       returns (PutResponse);
+    rpc Append(AppendRequest) returns (AppendResponse);
+}

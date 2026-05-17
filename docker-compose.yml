@@ -1,0 +1,107 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Volumes
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  localstack_data:
+  build_cache:        # persists the cmake/make build between container restarts
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Services
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # LocalStack — Amazon S3 emulation for local development
+  # ──────────────────────────────────────────────────────────────────────────
+  localstack:
+    image: localstack/localstack:3.0
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ./scripts/init-localstack.sh:/etc/localstack/init/ready.d/init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      retries: 15
+      start_period: 10s
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Raft KV nodes — one container per node, peer-to-peer gRPC on :50050
+  # ──────────────────────────────────────────────────────────────────────────
+  kvnode-0:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: raftdrive-env
+    volumes:
+      - .:/workspace/raftdrive
+      - build_cache:/workspace/raftdrive/build
+    working_dir: /workspace/raftdrive
+    entrypoint: ["/workspace/raftdrive/scripts/entrypoint-kvnode.sh"]
+    command: ["0", "0.0.0.0:50050", "kvnode-1:50050", "kvnode-2:50050"]
+    ports:
+      - "50050:50050"
+    restart: on-failure
+
+  kvnode-1:
+    image: raftdrive-env
+    volumes:
+      - .:/workspace/raftdrive
+      - build_cache:/workspace/raftdrive/build
+    working_dir: /workspace/raftdrive
+    entrypoint: ["/workspace/raftdrive/scripts/entrypoint-kvnode.sh"]
+    command: ["1", "0.0.0.0:50050", "kvnode-0:50050", "kvnode-2:50050"]
+    ports:
+      - "50051:50050"
+    restart: on-failure
+
+  kvnode-2:
+    image: raftdrive-env
+    volumes:
+      - .:/workspace/raftdrive
+      - build_cache:/workspace/raftdrive/build
+    working_dir: /workspace/raftdrive
+    entrypoint: ["/workspace/raftdrive/scripts/entrypoint-kvnode.sh"]
+    command: ["2", "0.0.0.0:50050", "kvnode-0:50050", "kvnode-1:50050"]
+    ports:
+      - "50052:50050"
+    restart: on-failure
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # RaftDrive — REST API server on :8080
+  # ──────────────────────────────────────────────────────────────────────────
+  raftdrive:
+    image: raftdrive-env
+    depends_on:
+      kvnode-0:
+        condition: service_started
+      kvnode-1:
+        condition: service_started
+      kvnode-2:
+        condition: service_started
+      localstack:
+        condition: service_healthy
+    volumes:
+      - .:/workspace/raftdrive
+      - build_cache:/workspace/raftdrive/build
+    working_dir: /workspace/raftdrive
+    entrypoint: ["/workspace/raftdrive/scripts/entrypoint-raftdrive.sh"]
+    ports:
+      - "8080:8080"
+    environment:
+      RAFTDRIVE_KV_TARGETS: "kvnode-0:50050,kvnode-1:50050,kvnode-2:50050"
+      RAFTDRIVE_S3_BUCKET: raftdrive-objects
+      RAFTDRIVE_S3_ENDPOINT: "http://localstack:4566"
+      RAFTDRIVE_S3_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      RAFTDRIVE_PORT: "8080"
+    restart: on-failure

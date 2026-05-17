@@ -1,0 +1,24 @@
+# ── Build the Docker image (only needed once, or after Dockerfile changes) ──
+docker build -t raftdrive-env .
+
+# ── Start all services (LocalStack + 3 kvnodes + raftdrive) ─────────────────
+# First run auto-builds the C++ binaries inside the containers (~3 min)
+docker compose up
+
+# ── Start just the kvnodes + localstack (skip raftdrive) ────────────────────
+docker compose up kvnode-0 kvnode-1 kvnode-2 localstack
+
+# ── Open a shell in the build environment ───────────────────────────────────
+docker run --rm -it \
+  -v $(pwd):/workspace/raftdrive \
+  raftdrive-env bash
+
+# ── Inside that shell: build the C++ code ───────────────────────────────────
+#   cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+#   cmake --build build --parallel 2
+
+# ── Smoke-test the KV gRPC service ──────────────────────────────────────────
+#   grpcurl -plaintext localhost:50050 kvstore.KVStore/Get '{"key":"dir:/"}'
+
+# ── Force recompile a specific target (e.g. after header-only change) ───────
+#   touch raftdrive/main.cpp && docker compose up
