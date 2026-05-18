@@ -1,80 +1,52 @@
 #include <iostream>
 #include <cstdlib>
-#include "services/service_metadata.hpp"
+#include <aws/core/Aws.h>
+#include "crow.h"
 #include "clients/kv_grpc_client.hpp"
+#include "services/service_metadata.hpp"
+#include "services/service_storage.hpp"
+#include "services/service_fs.hpp"
+#include "api/router.hpp"
 
-static void check(const std::string& label, bool pass) {
-    std::cout << (pass ? "[PASS] " : "[FAIL] ") << label << "\n";
-}
+int main()
+{
+    std::cout << std::unitbuf;
 
-int main() {
-    std::cout << std::unitbuf;  // flush after every write (Docker pipes buffer by default)
-    const char* target = std::getenv("RAFTDRIVE_KV_TARGETS");
-    if (!target) target = "localhost:50050";
+    // 1. Read environment variables
+    const char* t = std::getenv("RAFTDRIVE_KV_TARGETS");
+    const char* b = std::getenv("RAFTDRIVE_S3_BUCKET");
+    const char* e = std::getenv("RAFTDRIVE_S3_ENDPOINT");
+    const char* r = std::getenv("RAFTDRIVE_S3_REGION");
+    const char* p = std::getenv("RAFTDRIVE_PORT");
 
-    std::cout << "[raftdrive-test] connecting to kvnodes at " << target << "\n";
+    const std::string kvTargets = t ? t : "localhost:50050";
+    const std::string bucket    = b ? b : "raftdrive-objects";
+    const std::string endpoint  = e ? e : "";
+    const std::string region    = r ? r : "us-east-1";
+    const int         port      = p ? std::atoi(p) : 8080;
 
-    KVStoreClient kv(target);
-    MetadataService meta(kv);
+    // 2. Init AWS SDK
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
 
-    // 1. ensureRoot — idempotent, must not throw
-    meta.ensureRoot();
-    auto root = meta.getDir("/");
-    check("ensureRoot: root dir exists", root.has_value());
-    if (root) check("ensureRoot: root path is '/'", root->path == "/");
+    // 3. Construct services in order
+    KVStoreClient     kv(kvTargets);
+    MetadataService   meta(kv);
+    StorageService    storage(bucket, endpoint, region);
+    FileSystemService fs(storage, meta);
 
-    // 2. createDir
-    meta.createDir("/TestDir");
-    auto dir = meta.getDir("/TestDir");
-    check("createDir: dir exists", dir.has_value());
-    if (dir) check("createDir: name correct", dir->name == "TestDir");
-    if (dir) check("createDir: parent is '/'", dir->parent == "/");
+    // 4. Ensure root dir exists
+    fs.ensureRoot();
 
-    // 3. root children include TestDir
-    auto rootChildren = meta.getChildren("/");
-    bool hasTestDir = false;
-    for (const auto& c : rootChildren) if (c == "TestDir") hasTestDir = true;
-    check("getChildren: TestDir in root children", hasTestDir);
+    // 5. Set up Crow and register routes
+    crow::SimpleApp app;
+    registerRoutes(app, fs);
 
-    // 4. createFile inside TestDir
-    FileMeta f;
-    f.name = "hello.txt";
-    f.path = "/TestDir/hello.txt";
-    f.parent = "/TestDir";
-    f.size = 42;
-    f.content_type = "text/plain";
-    f.s3_key = "files/test-uuid-hello.txt";
-    meta.createFile(f);
+    // 6. Start server
+    app.port(port).multithreaded().run();
 
-    auto file = meta.getFile("/TestDir/hello.txt");
-    check("createFile: file exists", file.has_value());
-    if (file) check("createFile: name correct", file->name == "hello.txt");
-    if (file) check("createFile: s3_key correct", file->s3_key == "files/test-uuid-hello.txt");
+    // 7. Shutdown AWS SDK after server exits
+    Aws::ShutdownAPI(options);
 
-    // 5. TestDir children include hello.txt
-    auto dirChildren = meta.getChildren("/TestDir");
-    bool hasFile = false;
-    for (const auto& c : dirChildren) if (c == "hello.txt") hasFile = true;
-    check("getChildren: hello.txt in TestDir children", hasFile);
-
-    // 6. deleteFile
-    meta.deleteFile("/TestDir/hello.txt");
-    check("deleteFile: file gone", !meta.getFile("/TestDir/hello.txt").has_value());
-
-    dirChildren = meta.getChildren("/TestDir");
-    bool fileGone = true;
-    for (const auto& c : dirChildren) if (c == "hello.txt") { fileGone = false; break; }
-    check("deleteFile: removed from parent children", fileGone);
-
-    // 7. deleteDir
-    meta.deleteDir("/TestDir");
-    check("deleteDir: dir gone", !meta.getDir("/TestDir").has_value());
-
-    rootChildren = meta.getChildren("/");
-    bool dirGone = true;
-    for (const auto& c : rootChildren) if (c == "TestDir") { dirGone = false; break; }
-    check("deleteDir: removed from root children", dirGone);
-
-    std::cout << "[raftdrive-test] done.\n";
     return 0;
 }

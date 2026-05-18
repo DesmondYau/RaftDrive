@@ -14,7 +14,7 @@
 #include "raft/logger.hpp"
 #include "raft/persister.hpp"
 #include "raft/apply_channel.hpp"
-#include "transport/client_abstract.hpp"
+#include "transport/client_raft_abstract.hpp"
 #include "models.hpp"
 
 
@@ -22,7 +22,7 @@ class KVServer : public std::enable_shared_from_this<KVServer>
 {
 public:
     KVServer(int id, int maxRaftState, std::shared_ptr<Persister> persister,
-             std::vector<std::shared_ptr<IRaftTransport>> transports);
+             std::vector<std::shared_ptr<RaftClient>> transports);
     ~KVServer();
 
     void get(const models::GetArgs& args, models::GetReply& reply);

@@ -7,7 +7,7 @@
 
 
 KVServer::KVServer(int id, int maxRaftState, std::shared_ptr<Persister> persister,
-                   std::vector<std::shared_ptr<IRaftTransport>> transports)
+                   std::vector<std::shared_ptr<RaftClient>> transports)
     : m_id {id}
     , m_maxRaftState {maxRaftState}
     , m_dead {false}

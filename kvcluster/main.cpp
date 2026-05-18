@@ -31,12 +31,12 @@ int main(int argc, char** argv)
     // argv[3..] lists all peer addresses in ascending node-ID order, skipping self.
     // We reconstruct the full indexed array by inserting nullptr at position nodeId.
     int totalNodes = (argc - 3) + 1;  // peers given + self
-    std::vector<std::shared_ptr<IRaftTransport>> transports(totalNodes, nullptr);
+    std::vector<std::shared_ptr<RaftClient>> transports(totalNodes, nullptr);
     int peerArgIdx = 0;
     for (int i = 0; i < totalNodes; ++i)
     {
         if (i == nodeId) continue;          // leave nullptr at own slot
-        transports[i] = std::make_shared<GrpcRaftTransport>(argv[3 + peerArgIdx]);
+        transports[i] = std::make_shared<GrpcRaftClient>(argv[3 + peerArgIdx]);
         ++peerArgIdx;
     }
 

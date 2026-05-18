@@ -1,0 +1,72 @@
+#include "service_storage.hpp"
+#include <sstream>
+
+
+
+StorageService::StorageService(const std::string& bucketName, const std::string& addr, const std::string& region)
+    : m_bucket { bucketName }
+{
+    // Set up AWS client config
+    Aws::Client::ClientConfiguration cfg;
+    cfg.region = region;
+
+    if (!addr.empty())
+        cfg.endpointOverride = addr;
+
+    // Pass AWS client config to AWS client
+    m_client = Aws::S3::S3Client(cfg, Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never, false);
+
+}
+
+void StorageService::putObject(const std::string& key, const std::string& data, const std::string& contentType)
+{
+    // Wrap data in stringstream
+    auto stream = std::make_shared<std::stringstream>(data);
+
+    // Build request
+    Aws::S3::Model::PutObjectRequest req;
+    req.SetBucket(m_bucket);
+    req.SetKey(key);
+    req.SetBody(stream);
+    req.SetContentType(contentType);
+
+    auto outcome = m_client.PutObject(req);
+    if (!outcome.IsSuccess())
+        throw std::runtime_error(outcome.GetError().GetMessage());
+
+}
+
+std::string StorageService::getObject(const std::string& key)
+{
+    // Build request
+    Aws::S3::Model::GetObjectRequest req;
+    req.SetBucket(m_bucket);
+    req.SetKey(key);
+
+    // Call GetObject
+    auto outcome = m_client.GetObject(req);
+    if (outcome.IsSuccess())
+    {
+        std::ostringstream oss;
+        oss << outcome.GetResult().GetBody().rdbuf();
+        return oss.str();
+    }
+    else
+    {
+        throw std::runtime_error(outcome.GetError().GetMessage());
+    }
+}
+
+void StorageService::deleteObject(const std::string& key)
+{
+    // Build request
+    Aws::S3::Model::DeleteObjectRequest req;
+    req.SetBucket(m_bucket);
+    req.SetKey(key);
+
+    // Call DeleteObject
+    auto outcome = m_client.DeleteObject(req);
+    if (!outcome.IsSuccess())
+        throw std::runtime_error(outcome.GetError().GetMessage());
+
+}

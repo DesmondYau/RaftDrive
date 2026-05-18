@@ -23,8 +23,7 @@ public:
         while (std::getline(ss, addr, ','))
         {
             if (!addr.empty())
-                m_stubs.push_back(kvstore::KVStore::NewStub(
-                    grpc::CreateChannel(addr, grpc::InsecureChannelCredentials())));
+                m_stubs.push_back(kvstore::KVStore::NewStub(grpc::CreateChannel(addr, grpc::InsecureChannelCredentials())));
         }
     }
 

@@ -13,7 +13,7 @@
 #include "raft_types.hpp"
 #include "apply_channel.hpp"
 #include "threadpool.hpp"
-#include "transport/client_abstract.hpp"
+#include "transport/client_raft_abstract.hpp"
 
 class Persister;
 class Logger;
@@ -24,7 +24,7 @@ public:
     enum class State { LEADER, CANDIDATE, FOLLOWER };
 
     // peers: one transport per peer (indexed 0..n-1, skip own id)
-    Raft(std::vector<std::shared_ptr<IRaftTransport>> peers, int32_t id,
+    Raft(std::vector<std::shared_ptr<RaftClient>> peers, int32_t id,
          std::shared_ptr<Persister> persister,
          std::shared_ptr<ApplyChannel> applyChannel,
          std::shared_ptr<Logger> logger);
@@ -69,7 +69,7 @@ private:
     uint64_t m_lastIncludedIndex { 0 };
     uint32_t m_lastIncludedTerm  { 0 };
     State    m_state         { State::FOLLOWER };
-    std::vector<std::shared_ptr<IRaftTransport>>   m_peers    {};
+    std::vector<std::shared_ptr<RaftClient>>       m_peers    {};
     std::vector<std::shared_ptr<LogEntry>>         m_logs     {};
     std::vector<uint64_t>                          m_nextindex{};
     std::vector<uint64_t>                          m_matchIndex{};

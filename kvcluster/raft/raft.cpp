@@ -11,7 +11,7 @@
 // Constructor / Destructor
 // ============================================================
 
-Raft::Raft(std::vector<std::shared_ptr<IRaftTransport>> peers, int32_t id,
+Raft::Raft(std::vector<std::shared_ptr<RaftClient>> peers, int32_t id,
            std::shared_ptr<Persister> persister,
            std::shared_ptr<ApplyChannel> applyChannel,
            std::shared_ptr<Logger> logger)

@@ -53,8 +53,9 @@ void MetadataService::createDir(const std::string& path)
     // 2. Create childrenKey for this new path
     m_kvStoreClient.put(childrenKey(path), "[]");
 
-    // 3. Register this dir as child of parent;
-    createChild(parent, name);    
+    // 3. Register this dir as child of parent (skip for root)
+    if (!name.empty())
+        createChild(parent, name);
 }
 
 void MetadataService::deleteDir(const std::string& path)

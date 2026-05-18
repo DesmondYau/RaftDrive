@@ -1,15 +1,15 @@
 #pragma once
 #include <grpcpp/grpcpp.h>
 #include "raft.grpc.pb.h"
-#include "client_abstract.hpp"
+#include "client_raft_abstract.hpp"
 
 
 /**
- * @brief Implementation of Abstract Class IRaftTranspot
+ * @brief Implementation of Abstract Class RaftClient
  */
-class GrpcRaftTransport : public IRaftTransport {
+class GrpcRaftClient : public RaftClient {
 public:
-    explicit GrpcRaftTransport(const std::string& peerAddr)
+    explicit GrpcRaftClient(const std::string& peerAddr)
         : m_stub(raftpb::RaftService::NewStub(grpc::CreateChannel(peerAddr, grpc::InsecureChannelCredentials())))
     {}
 
@@ -56,7 +56,7 @@ public:
 
         raftpb::AppendEntriesReply resp;
         grpc::ClientContext ctx;
-        ctx.set_deadline(std::chrono::system_clock::now() + std::chrono::milliseconds(200));
+        ctx.set_deadline(std::chrono::system_clock::now() + std::chrono::milliseconds(500));
 
         grpc::Status status = m_stub->AppendEntries(&ctx, req, &resp);
         if (!status.ok()) 
