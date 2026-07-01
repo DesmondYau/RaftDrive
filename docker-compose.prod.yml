@@ -1,5 +1,3 @@
-version: "3.9"
-
 # Overrides docker-compose.yml for production (real AWS S3, no LocalStack).
 # Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up
 
@@ -16,6 +14,9 @@ services:
         condition: service_started
       kvnode-2:
         condition: service_started
+      localstack:
+        condition: service_started
+        required: false
     environment:
       RAFTDRIVE_KV_TARGETS: "kvnode-0:50050,kvnode-1:50050,kvnode-2:50050"
       RAFTDRIVE_S3_BUCKET: raftdrive-objects
