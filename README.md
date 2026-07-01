@@ -6,25 +6,39 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 
 ## Architecture
 
-### Upload
-
 ```mermaid
 flowchart TD
-    Browser -->|"POST /api/files/path (file bytes)"| raftdrive
-    raftdrive -->|"1. PUT bytes"| S3["S3 / LocalStack :4566"]
-    raftdrive -->|"2. PUT metadata (path, s3_key, size)"| Leader["kvnode-leader :50050"]
-    Leader -->|"Raft replication"| N1["kvnode-1"]
-    Leader -->|"Raft replication"| N2["kvnode-2"]
-```
+    Browser["🌐 Browser\n:5173"]
 
-### Download
+    subgraph raftdrive["raftdrive  :8080"]
+        Handler["HTTP Handler\nCrow REST API"]
+        FS["FileSystemService"]
+        Meta["MetadataService"]
+        Storage["StorageService"]
+        KVClient["KVStoreClient\nleader retry"]
 
-```mermaid
-flowchart TD
-    Browser -->|"GET /api/files/path"| raftdrive
-    raftdrive -->|"1. GET metadata (s3_key)"| Leader["kvnode-leader :50050"]
-    raftdrive -->|"2. GET bytes"| S3["S3 / LocalStack :4566"]
-    raftdrive -->|"3. Return file bytes"| Browser
+        Handler --> FS
+        FS --> Meta
+        FS --> Storage
+        Meta --> KVClient
+    end
+
+    subgraph kvcluster["Raft KV Cluster"]
+        direction LR
+        KV0["kvnode-0\n:50050"]
+        KV1["kvnode-1\n:50051"]
+        KV2["kvnode-2\n:50052"]
+
+        KV0 <-->|"Raft RPCs"| KV1
+        KV0 <-->|"Raft RPCs"| KV2
+        KV1 <-->|"Raft RPCs"| KV2
+    end
+
+    S3["☁️ S3 / LocalStack\n:4566"]
+
+    Browser -->|"HTTP /api/*"| Handler
+    KVClient -->|"gRPC Put/Get/Append"| KV0
+    Storage -->|"PUT / GET bytes"| S3
 ```
 
 ---
