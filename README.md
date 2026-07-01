@@ -6,23 +6,26 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 
 ## Architecture
 
-```
-Browser (React/TS :5173)
-        │  /api/* (Vite proxy)
-        ▼
-raftdrive   (C++, Crow HTTP :8080)
-    ├── FileSystemService  →  MetadataService + StorageService
-    ├── KVStoreClient      →  kvnode-{0,1,2} :50050  (gRPC)
-    └── StorageService     →  S3 / LocalStack :4566
-                │  gRPC over TCP (Raft RPCs)
-                ▼
-kvnode-{0,1,2}  (3 separate containers, one Raft node each)
-    ├── KVStoreServiceImpl  ←  handles Put / Get / Append from raftdrive
-    ├── DistributedRaftBackend  →  KVServer  →  Raft
-    └── RaftServiceImpl     ←  handles RequestVote / AppendEntries from peers
+### Upload
+
+```mermaid
+flowchart TD
+    Browser -->|"POST /api/files/path (file bytes)"| raftdrive
+    raftdrive -->|"1. PUT bytes"| S3["S3 / LocalStack :4566"]
+    raftdrive -->|"2. PUT metadata (path, s3_key, size)"| Leader["kvnode-leader :50050"]
+    Leader -->|"Raft replication"| N1["kvnode-1"]
+    Leader -->|"Raft replication"| N2["kvnode-2"]
 ```
 
-Each `kvnode` runs one Raft node. The three nodes elect a leader via Raft and replicate all KV operations through the consensus log. `raftdrive` tries all three nodes, retrying on `WRONG_LEADER` until it finds the current leader.
+### Download
+
+```mermaid
+flowchart TD
+    Browser -->|"GET /api/files/path"| raftdrive
+    raftdrive -->|"1. GET metadata (s3_key)"| Leader["kvnode-leader :50050"]
+    raftdrive -->|"2. GET bytes"| S3["S3 / LocalStack :4566"]
+    raftdrive -->|"3. Return file bytes"| Browser
+```
 
 ---
 
