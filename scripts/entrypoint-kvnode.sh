@@ -19,7 +19,7 @@ mkdir -p /workspace/raftdrive/build
   fi
 
   echo "[build] Building..."
-  cmake --build /workspace/raftdrive/build --parallel 2
+  cmake --build /workspace/raftdrive/build --parallel 1
   echo "[build] Done."
 
 ) 200>"$LOCK"              # Open the file specified by $LOCK and assign it to File Descriptor (Channel) 200

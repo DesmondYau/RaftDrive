@@ -30,10 +30,10 @@ int main()
     Aws::InitAPI(options);
 
     // 3. Construct services in order
-    KVStoreClient     kv(kvTargets);
-    MetadataService   meta(kv);
-    StorageService    storage(bucket, endpoint, region);
-    FileSystemService fs(storage, meta);
+    KVStoreClient kv {kvTargets};
+    MetadataService meta {kv};
+    StorageService storage {bucket, endpoint, region};
+    FileSystemService fs {storage, meta};
 
     // 4. Ensure root dir exists
     fs.ensureRoot();

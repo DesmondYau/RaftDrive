@@ -18,7 +18,7 @@ mkdir -p /workspace/raftdrive/build
   fi
 
   echo "[build] Building..."
-  cmake --build /workspace/raftdrive/build --parallel 2
+  cmake --build /workspace/raftdrive/build --parallel 1
   echo "[build] Done."
 
 ) 200>"$LOCK"
