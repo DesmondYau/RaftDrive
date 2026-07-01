@@ -1,0 +1,25 @@
+version: "3.9"
+
+# Overrides docker-compose.yml for production (real AWS S3, no LocalStack).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+
+  localstack:
+    profiles: ["local"]   # disabled in prod — not included unless --profile local
+
+  raftdrive:
+    depends_on:
+      kvnode-0:
+        condition: service_started
+      kvnode-1:
+        condition: service_started
+      kvnode-2:
+        condition: service_started
+    environment:
+      RAFTDRIVE_KV_TARGETS: "kvnode-0:50050,kvnode-1:50050,kvnode-2:50050"
+      RAFTDRIVE_S3_BUCKET: raftdrive-objects
+      RAFTDRIVE_S3_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      RAFTDRIVE_PORT: "8080"
