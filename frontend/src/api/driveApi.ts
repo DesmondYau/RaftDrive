@@ -1,6 +1,6 @@
 import { ListingResult } from '../types/drive'
 
-const base = '/api'
+const base = import.meta.env.VITE_API_BASE ?? '/api'
 
 export async function listDir(path: string): Promise<ListingResult> {
   const url = path === '/' ? `${base}/dirs/` : `${base}/dirs${path}`
