@@ -10,11 +10,12 @@ StorageService::StorageService(const std::string& bucketName, const std::string&
     Aws::Client::ClientConfiguration cfg;
     cfg.region = region;
 
-    if (!addr.empty())
+    bool useLocalStack = !addr.empty();
+    if (useLocalStack)
         cfg.endpointOverride = addr;
 
-    // Pass AWS client config to AWS client
-    m_client = Aws::S3::S3Client(cfg, Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never, false);
+    // Virtual hosted-style URLs required for real S3; path-style needed for LocalStack
+    m_client = Aws::S3::S3Client(cfg, Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never, !useLocalStack);
 
 }
 
