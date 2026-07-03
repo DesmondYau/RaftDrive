@@ -23,7 +23,7 @@ int main()
     const std::string bucket    = b ? b : "raftdrive-objects";
     const std::string endpoint  = e ? e : "";
     const std::string region    = r ? r : "us-east-1";
-    const int         port      = p ? std::atoi(p) : 8080;
+    const int port = p ? std::atoi(p) : 8080;
 
     // 2. Init AWS SDK
     Aws::SDKOptions options;

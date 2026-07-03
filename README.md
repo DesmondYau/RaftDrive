@@ -4,6 +4,14 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 
 ---
 
+## Try It Yourself
+
+[![Try it yourself](https://img.shields.io/badge/Try%20it%20yourself-raftdrive.vercel.app-blue?style=for-the-badge&logo=vercel)](https://raftdrive.vercel.app)
+
+> **Frontend** — Vercel &nbsp;|&nbsp; **Backend (Raft cluster + S3)** — AWS EC2 &nbsp;|&nbsp; **Object Storage** — AWS S3
+
+---
+
 ## Architecture
 
 ```mermaid
