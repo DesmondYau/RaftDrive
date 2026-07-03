@@ -33,7 +33,13 @@ void StorageService::putObject(const std::string& key, const std::string& data, 
 
     auto outcome = m_client.PutObject(req);
     if (!outcome.IsSuccess())
-        throw std::runtime_error(outcome.GetError().GetMessage());
+    {
+        auto& err = outcome.GetError();
+        std::cerr << "[S3 putObject] code=" << static_cast<int>(err.GetErrorType())
+                  << " msg=" << err.GetMessage()
+                  << " remoteHost=" << err.GetRemoteHostIpAddress() << "\n";
+        throw std::runtime_error(err.GetMessage());
+    }
 
 }
 
