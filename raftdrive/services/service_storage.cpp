@@ -13,6 +13,7 @@ StorageService::StorageService(const std::string& bucketName, const std::string&
     bool useLocalStack = !addr.empty();
     if (useLocalStack)
         cfg.endpointOverride = addr;
+    std::cerr << "[S3 init] bucket=" << bucketName << " region=" << region << " endpoint=" << addr << " useLocalStack=" << useLocalStack << "\n";
 
     // Virtual hosted-style URLs required for real S3; path-style needed for LocalStack
     m_client = Aws::S3::S3Client(cfg, Aws::Client::AWSAuthV4Signer::PayloadSigningPolicy::Never, !useLocalStack);
@@ -30,6 +31,7 @@ void StorageService::putObject(const std::string& key, const std::string& data, 
     req.SetKey(key);
     req.SetBody(stream);
     req.SetContentType(contentType);
+    std::cerr << "[S3 putObject] bucket=" << m_bucket << " key=" << key << "\n";
 
     auto outcome = m_client.PutObject(req);
     if (!outcome.IsSuccess())
