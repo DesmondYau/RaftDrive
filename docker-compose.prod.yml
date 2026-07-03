@@ -20,6 +20,7 @@ services:
     environment:
       RAFTDRIVE_KV_TARGETS: "kvnode-0:50050,kvnode-1:50050,kvnode-2:50050"
       RAFTDRIVE_S3_BUCKET: raftdrive-objects
+      RAFTDRIVE_S3_ENDPOINT: ""
       RAFTDRIVE_S3_REGION: us-east-1
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
