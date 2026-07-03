@@ -108,6 +108,7 @@ inline crow::response handleUploadFile(FileSystemService& fs, const std::string&
     }
     catch (const std::runtime_error& e)
     {
+        std::cerr << "[uploadFile] ERROR: " << e.what() << "\n";
         return crow::response(409, e.what());
     }
 }
