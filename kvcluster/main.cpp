@@ -7,7 +7,6 @@
 
 #include "service_kv_grpc.hpp"
 #include "service_raft_grpc.hpp"
-#include "backends/backend_kvRaft.hpp"
 #include "kvserver/kvserver.hpp"
 #include "raft/persister.hpp"
 #include "transport/client_raft_grpc.hpp"
@@ -24,7 +23,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    int         nodeId     = std::atoi(argv[1]);
+    int nodeId = std::atoi(argv[1]);
     std::string listenAddr = argv[2];
 
     // Raft::m_peers must be indexed by node ID (size = total nodes, nullptr at own slot).
@@ -42,10 +41,9 @@ int main(int argc, char** argv)
 
     auto persister = std::make_shared<Persister>();
     auto kvServer  = std::make_shared<KVServer>(nodeId, -1, persister, std::move(transports));
-    auto backend   = std::make_shared<DistributedRaftBackend>(kvServer);
 
-    KVStoreServiceImpl kvService(backend);
-    RaftServiceImpl    raftService(kvServer->getRaft());
+    KVStoreServiceImpl kvService(kvServer);
+    RaftServiceImpl raftService(kvServer->getRaft());
 
     grpc::ServerBuilder builder;
     builder.AddListeningPort(listenAddr, grpc::InsecureServerCredentials());
