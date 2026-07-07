@@ -49,7 +49,7 @@ services:
     command: ["0", "0.0.0.0:50050", "kvnode-1:50050", "kvnode-2:50050"]
     ports:
       - "50050:50050"
-    restart: on-failure
+    restart: unless-stopped
 
   kvnode-1:
     image: raftdrive-env
@@ -61,7 +61,7 @@ services:
     command: ["1", "0.0.0.0:50050", "kvnode-0:50050", "kvnode-2:50050"]
     ports:
       - "50051:50050"
-    restart: on-failure
+    restart: unless-stopped
 
   kvnode-2:
     image: raftdrive-env
@@ -73,7 +73,7 @@ services:
     command: ["2", "0.0.0.0:50050", "kvnode-0:50050", "kvnode-1:50050"]
     ports:
       - "50052:50050"
-    restart: on-failure
+    restart: unless-stopped
 
   # ──────────────────────────────────────────────────────────────────────────
   # RaftDrive — REST API server on :8080
@@ -104,4 +104,4 @@ services:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       RAFTDRIVE_PORT: "8080"
-    restart: on-failure
+    restart: unless-stopped

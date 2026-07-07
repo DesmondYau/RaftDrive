@@ -486,8 +486,10 @@ std::tuple<int, int, bool> Raft::start(const std::string& command)
     std::lock_guard<std::mutex> lock(m_mu);
     if (m_state != State::LEADER)
         return {-1, -1, false};
+
     LogEvent ev(LogEvent::Type::REPLICATION, m_id, m_currentTerm, "Appended new log entry: " + command);
     m_logger->logRaft(LogLevel::INFO, ev);
+    
     m_logs.emplace_back(std::make_shared<LogEntry>(command, m_currentTerm));
     m_newLogArrive = true;
     helperPersist();

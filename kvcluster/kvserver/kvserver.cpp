@@ -20,7 +20,6 @@ KVServer::KVServer(int id, int maxRaftState, std::shared_ptr<Persister> persiste
     m_raft = std::make_unique<Raft>(std::move(transports), m_id, persister, applyChannel, logger);
 
     m_applyChannel = applyChannel;
-
     m_applierThread = std::thread(&KVServer::applierLoop, this);
 }
 
