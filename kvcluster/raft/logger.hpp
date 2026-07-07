@@ -107,25 +107,20 @@ public:
 
     void logRaft(LogLevel level, const LogEvent& event)
     {
-        /*
         std::lock_guard<std::mutex> lock(m_mu);
         if (level != LogLevel::DEBUG)
         {
             m_out << "[Raft] [" << levelToString(level) << "] " << event.toString() << "\n";
         }
-        */
-        
     }
 
     void logKVServer(LogLevel level, const LogEvent& event)
     {
-        /*
         std::lock_guard<std::mutex> lock(m_mu);
         if (level != LogLevel::DEBUG)
         {
             m_out << "[KVServer] [" << levelToString(level) << "] " << event.toString() << "\n";
         }
-        */
     }
 
 private:
