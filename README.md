@@ -12,7 +12,7 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 
 ## Architecture
 
-![RaftDrive Architecture](graphs/RaftDrive.png)
+![RaftDrive Architecture](assets/RaftDrive.png)
 
 ---
 
