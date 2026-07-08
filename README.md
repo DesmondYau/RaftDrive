@@ -12,40 +12,7 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    Browser["🌐 Browser\n:5173"]
-
-    subgraph raftdrive["raftdrive  :8080"]
-        Handler["HTTP Handler\nCrow REST API"]
-        FS["FileSystemService"]
-        Meta["MetadataService"]
-        Storage["StorageService"]
-        KVClient["KVStoreClient\nleader retry"]
-
-        Handler --> FS
-        FS --> Meta
-        FS --> Storage
-        Meta --> KVClient
-    end
-
-    subgraph kvcluster["Raft KV Cluster"]
-        direction LR
-        KV0["kvnode-0\n:50050"]
-        KV1["kvnode-1\n:50051"]
-        KV2["kvnode-2\n:50052"]
-
-        KV0 <-->|"Raft RPCs"| KV1
-        KV0 <-->|"Raft RPCs"| KV2
-        KV1 <-->|"Raft RPCs"| KV2
-    end
-
-    S3["☁️ S3 / LocalStack\n:4566"]
-
-    Browser -->|"HTTP /api/*"| Handler
-    KVClient -->|"gRPC Put/Get/Append"| KV0
-    Storage -->|"PUT / GET bytes"| S3
-```
+![RaftDrive Architecture](graphs/RaftDrive.png)
 
 ---
 
@@ -112,9 +79,6 @@ RaftDrive/
 │   ├── transport/
 │   │   ├── client_raft_abstract.hpp   # IRaftTransport interface
 │   │   └── client_raft_grpc.hpp       # gRPC implementation
-│   ├── backends/
-│   │   ├── backend_abstract.hpp       # IKVBackend interface
-│   │   └── backend_kvRaft.hpp         # Bridges KVServer → IKVBackend
 │   ├── service_kv_grpc.hpp    # gRPC KVStore service (handles client requests)
 │   ├── service_raft_grpc.hpp  # gRPC Raft service (handles peer RPCs)
 │   └── main.cpp               # kvnode entry point
