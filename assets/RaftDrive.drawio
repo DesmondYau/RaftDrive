@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram name="第 1 页" id="GKM_BHNXUjq3oWujszpF">
-    <mxGraphModel dx="1230" dy="731" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1230" dy="733" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -28,7 +28,7 @@
         <mxCell id="lZr7arlLV-hCrFBrPEJp-25" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2CEFF;strokeColor=#B2B2DE;fontColor=#660000;" value="&lt;b&gt;Metadata Service&lt;/b&gt;" vertex="1">
           <mxGeometry height="40" width="131" x="249" y="310" as="geometry" />
         </mxCell>
-        <mxCell id="lZr7arlLV-hCrFBrPEJp-27" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2CEFF;strokeColor=#B2B2DE;fontColor=#660000;" value="&lt;b&gt;KV Store Client&lt;/b&gt;" vertex="1">
+        <mxCell id="lZr7arlLV-hCrFBrPEJp-27" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2CEFF;strokeColor=#B2B2DE;fontColor=#660000;" value="&lt;b&gt;KV Store gRPC&amp;nbsp;&lt;/b&gt;&lt;div&gt;&lt;b&gt;Client&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="40" width="131" x="249" y="370" as="geometry" />
         </mxCell>
         <mxCell id="lZr7arlLV-hCrFBrPEJp-32" edge="1" parent="1" source="lZr7arlLV-hCrFBrPEJp-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="lZr7arlLV-hCrFBrPEJp-25">
@@ -92,10 +92,10 @@
         <mxCell id="lZr7arlLV-hCrFBrPEJp-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9E7;strokeColor=#FFCC99;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;locked=0;connectable=1;" value="" vertex="1">
           <mxGeometry height="250" width="360" x="70" y="490" as="geometry" />
         </mxCell>
-        <mxCell id="lZr7arlLV-hCrFBrPEJp-49" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#FFCC99;" value="&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;KV Node 0&lt;/font&gt;&lt;/b&gt;" vertex="1">
+        <mxCell id="lZr7arlLV-hCrFBrPEJp-49" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#FFCC99;" value="&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;KV Raft&amp;nbsp;&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;Node 0&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="45" width="100" x="199.26" y="521.22" as="geometry" />
         </mxCell>
-        <mxCell id="lZr7arlLV-hCrFBrPEJp-50" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#FFCC99;" value="&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;KV Node 1&lt;/font&gt;&lt;/b&gt;" vertex="1">
+        <mxCell id="lZr7arlLV-hCrFBrPEJp-50" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#FFCC99;" value="&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;KV Raft&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;Node 1&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="45" width="100" x="124.26" y="661.22" as="geometry" />
         </mxCell>
         <mxCell id="lZr7arlLV-hCrFBrPEJp-51" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE599;strokeColor=#FFCC99;" value="&lt;b&gt;&lt;font style=&quot;color: rgb(102, 0, 0);&quot;&gt;KV Node 2&lt;/font&gt;&lt;/b&gt;" vertex="1">
@@ -140,16 +140,16 @@
         <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;GEt / PUT files byte&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="38.42" width="90" x="620" y="451.58" as="geometry" />
         </mxCell>
-        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;KV gPRC to Leader&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Put/Get&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;KV gPRC to&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Leader Node:&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Put/Get&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="38.42" width="102.27" x="160.26" y="440" as="geometry" />
         </mxCell>
-        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Raft gPRC&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;RequestVote/&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;AppendEntries&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Raft gPRC:&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;RequestVote/&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;AppendEntries&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="38.42" width="90" x="296" y="592.7900000000001" as="geometry" />
         </mxCell>
-        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Raft gPRC&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;RequestVote/&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;AppendEntries&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Raft gPRC:&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;RequestVote/&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;AppendEntries&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="38.42" width="90" x="116.25999999999999" y="595.79" as="geometry" />
         </mxCell>
-        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Raft gPRC&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;RequestVote/&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;AppendEntries&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="Gt5tf5G7wrEAvTBwHYfJ-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;fontSize=10;" value="&lt;div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;Raft gPRC:&amp;nbsp;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;RequestVote/&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;color: rgb(0, 0, 0);&quot;&gt;AppendEntries&lt;/font&gt;&lt;/div&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="38.42" width="90" x="211.26" y="689.58" as="geometry" />
         </mxCell>
       </root>
