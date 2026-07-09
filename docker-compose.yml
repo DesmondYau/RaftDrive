@@ -50,6 +50,11 @@ services:
     ports:
       - "50050:50050"
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   kvnode-1:
     image: raftdrive-env
@@ -62,6 +67,11 @@ services:
     ports:
       - "50051:50050"
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   kvnode-2:
     image: raftdrive-env
@@ -74,6 +84,11 @@ services:
     ports:
       - "50052:50050"
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ──────────────────────────────────────────────────────────────────────────
   # RaftDrive — REST API server on :8080
@@ -105,3 +120,8 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       RAFTDRIVE_PORT: "8080"
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
