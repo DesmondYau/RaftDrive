@@ -350,23 +350,46 @@ void Raft::appendEntries(const AppendEntriesArgs& args, AppendEntriesReply& repl
         m_logger->logRaft(LogLevel::INFO, LogEvent(LogEvent::Type::REPLICATION, m_id, m_currentTerm, "RECEIVED appendEntries from " + std::to_string(args.leaderId)));
         reply.term    = m_currentTerm;
         reply.success = false;
-        if (m_currentTerm > args.term) return;
-        if (m_currentTerm < args.term) helperStepDownToFollower(args.term);
+        if (m_currentTerm > args.term)
+        {
+            return;
+        }
+        else if (m_currentTerm < args.term) 
+        {
+            helperStepDownToFollower(args.term);
+        }
+        else
+        {
+            m_lastHeartbeat = std::chrono::steady_clock::now();
+            m_electionTimeout = std::chrono::milliseconds(helperGenerateTimeout());
+            if (m_state == State::CANDIDATE)
+                m_state = State::FOLLOWER;
+        }
     }
+
     {
         std::lock_guard<std::mutex> lock(m_mu);
-        if (args.preLogIndex < m_lastIncludedIndex) { reply.success = false; return; }
+        if (args.preLogIndex < m_lastIncludedIndex) 
+        { 
+            reply.success = false; 
+            return; 
+        }
         uint64_t relPreLogIndex = args.preLogIndex - m_lastIncludedIndex;
+
         if (relPreLogIndex >= m_logs.size() || m_logs[relPreLogIndex]->term != args.preLogTerm)
         {
-            if (relPreLogIndex >= m_logs.size()) {
+            if (relPreLogIndex >= m_logs.size()) 
+            {
                 reply.conflictIndex = (m_logs.size() - 1) + m_lastIncludedIndex;
                 reply.conflictTerm  = -1;
-            } else {
+            } 
+            else 
+            {
                 reply.conflictTerm  = m_logs[relPreLogIndex]->term;
                 reply.conflictIndex = args.preLogIndex;
                 uint64_t relConflictIndex = reply.conflictIndex - m_lastIncludedIndex;
-                while (relConflictIndex > 0 && m_logs[relConflictIndex-1]->term == reply.conflictTerm) {
+                while (relConflictIndex > 0 && m_logs[relConflictIndex-1]->term == reply.conflictTerm) 
+                {
                     std::cout << "follower " << m_id << " stuck in while loop" << std::endl;
                     reply.conflictIndex--;
                     relConflictIndex--;
@@ -376,11 +399,11 @@ void Raft::appendEntries(const AppendEntriesArgs& args, AppendEntriesReply& repl
             return;
         }
     }
+
     {
         std::lock_guard<std::mutex> lock(m_mu);
         reply.success = true;
-        m_lastHeartbeat   = std::chrono::steady_clock::now();
-        m_electionTimeout = std::chrono::milliseconds(helperGenerateTimeout());
+        
         size_t adj{args.preLogIndex + 1 - m_lastIncludedIndex};
         size_t mark{0};
         for (size_t i{0}; i < args.entries.size(); i++)
@@ -398,6 +421,7 @@ void Raft::appendEntries(const AppendEntriesArgs& args, AppendEntriesReply& repl
                 }
             }
         }
+
         for (size_t i = mark; i < args.entries.size(); i++)
         {
             m_logs.push_back(std::make_shared<LogEntry>(args.entries[i].command, args.entries[i].term));
@@ -407,6 +431,7 @@ void Raft::appendEntries(const AppendEntriesArgs& args, AppendEntriesReply& repl
         }
         helperPersist();
     }
+    
     {
         std::lock_guard<std::mutex> lock(m_mu);
         if (args.leaderCommit > m_commitIndex)
