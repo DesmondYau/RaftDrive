@@ -26,6 +26,11 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 - Custom `RaftClient` interface abstracts the transport layer — swapping from in-process to gRPC required changing only 3 lines in `raft.cpp`
 - Each node runs as an independent container, communicating over Docker's internal network
 
+### Fault Tolerance
+- The cluster tolerates **1 node failure** out of 3 (Raft majority quorum = 2)
+- The cluster re-elects a new leader and resumes serving requests within 800ms of a node failure
+- `raftdrive` automatically routes requests to the new leader
+
 ### Strongly-consistent Metadata
 - All filesystem metadata (directories, file records, children lists) is stored as JSON values in the Raft KV store
 - KV schema:
@@ -38,13 +43,6 @@ A fault-tolerant cloud file drive built from scratch in C++, inspired by Google 
 - File bytes are stored in S3 (LocalStack for local dev, real AWS in production)
 - S3 keys are randomly generated (`files/<hex>-<filename>`) to avoid collisions on rename
 - Metadata and object storage are decoupled — deleting a file removes the KV entry and the S3 object independently
-
-### Clean Layered Architecture
-```
-Handler → FileSystemService → MetadataService + StorageService
-                           └→ KVStoreClient → kvnode gRPC
-```
-Each layer has a single responsibility and knows nothing about layers above it.
 
 ---
 
@@ -155,20 +153,6 @@ Open `http://localhost:5173` in your browser.
 | kvnode-1 gRPC | 50051 |
 | kvnode-2 gRPC | 50052 |
 | LocalStack (S3) | 4566 |
-
----
-
-## Fault Tolerance
-
-The cluster tolerates **1 node failure** out of 3 (Raft majority quorum = 2).
-
-```bash
-# Simulate a node failure
-docker compose stop kvnode-1
-
-# Cluster continues operating — remaining 2 nodes form quorum
-# raftdrive automatically routes requests to the new leader
-```
 
 ---
 
