@@ -212,21 +212,6 @@ void Raft::broadcastAppendEntries()
                 return;
             }
             
-            /*
-            void* current_vector_addr = m_nextindex.data();
-            if (m_last_vector_addr != nullptr && m_last_vector_addr != current_vector_addr)
-                std::cerr << "!!! REAL CRITICAL: m_nextindex vector moved in memory!" << std::endl;
-            m_last_vector_addr = current_vector_addr;
-            if (m_nextindex[id] > 10000000) {
-                std::cerr << "!!! DATA CORRUPTION: Found huge nextIndex value " << m_nextindex[id] << " for server " << id << std::endl;
-                return;
-            }
-            if (id >= m_nextindex.size()) {
-                std::cerr << "!!! OOB ACCESS: id=" << id << " size=" << m_nextindex.size() << std::endl;
-                continue;
-            }
-            */
-
             uint64_t prevLogIndex   = m_nextindex[id] - 1;
             auto relPrevLogIndex    = helperGetRelativeIndex(prevLogIndex);
             auto relNextIndex       = helperGetRelativeIndex(m_nextindex[id]);
@@ -588,19 +573,28 @@ int Raft::helperGenerateTimeout()
 
 void Raft::helperUpdateLeaderCommitIndex()
 {
-    if (m_dead.load() || m_state != State::LEADER) return;
-    if (m_logs.empty()) return;
+    if (m_dead.load() || m_state != State::LEADER) 
+        return;
+
+    if (m_logs.empty()) 
+        return;
+
     uint64_t lastLogIndex = m_lastIncludedIndex + m_logs.size() - 1;
     for (uint64_t N = lastLogIndex; N > m_commitIndex; --N)
     {
         uint64_t relIndex = N - m_lastIncludedIndex;
-        if (relIndex >= m_logs.size() || relIndex < 0) continue;
+        if (relIndex >= m_logs.size() || relIndex < 0) 
+            continue;
+
         int replicated = 1;
         for (size_t i = 0; i < m_peers.size(); i++)
         {
-            if (static_cast<int>(i) == m_id) continue;
-            if (m_matchIndex[i] >= N) replicated++;
+            if (static_cast<int>(i) == m_id) 
+                continue;
+            if (m_matchIndex[i] >= N) 
+                replicated++;
         }
+
         if (replicated > static_cast<int>(m_peers.size() / 2) && m_logs[relIndex]->term == m_currentTerm)
         {
             m_commitIndex = N;
@@ -615,6 +609,7 @@ void Raft::helperPromoteToLeader()
 {
     m_state = State::LEADER;
     m_cv.notify_all();
+
     LogEvent ev(LogEvent::Type::STATECHANGE, m_id, m_currentTerm, "State change to LEADER");
     m_logger->logRaft(LogLevel::INFO, ev);
 }
@@ -623,6 +618,7 @@ void Raft::helperPromoteToCandidate()
 {
     m_state = Raft::State::CANDIDATE;
     m_cv.notify_all();
+
     LogEvent ev(LogEvent::Type::STATECHANGE, m_id, m_currentTerm, "State change to CANDIDATE");
     m_logger->logRaft(LogLevel::INFO, ev);
 }
@@ -634,23 +630,31 @@ void Raft::helperStepDownToFollower(uint32_t term)
     m_state           = State::FOLLOWER;
     m_lastHeartbeat   = std::chrono::steady_clock::now();
     m_electionTimeout = std::chrono::milliseconds(helperGenerateTimeout());
+    
     LogEvent ev(LogEvent::Type::STATECHANGE, m_id, m_currentTerm, "State change to FOLLOWER");
     m_logger->logRaft(LogLevel::INFO, ev);
+    
     m_cv.notify_all();
+   
     helperPersist();
 }
 
 void Raft::helperPersist()
 {
     nlohmann::json j;
+    
     j["Term"]    = m_currentTerm;
     j["VotedFor"] = m_votedFor;
     std::vector<nlohmann::json> logVector;
     for (size_t i{1}; i < m_logs.size(); i++)
+    {
         logVector.push_back({{"Command", m_logs[i]->command}, {"Term", m_logs[i]->term}});
+    }
     j["Log"] = logVector;
+
     std::string data = j.dump();
     std::vector<uint8_t> state(data.begin(), data.end());
+
     m_persister->saveRaftState(state);
 }
 
@@ -658,6 +662,7 @@ void Raft::helperReadPersist()
 {
     std::vector<uint8_t> raftStateBytes = m_persister->readRaftState();
     std::vector<uint8_t> snapshotBytes  = m_persister->readSnapshot();
+
     if (raftStateBytes.empty())
     {
         m_lastIncludedIndex = 0;
@@ -666,41 +671,52 @@ void Raft::helperReadPersist()
         auto dummy = std::make_shared<LogEntry>();
         dummy->command = ""; dummy->term = 0;
         m_logs.push_back(dummy);
+
         LogEvent ev(LogEvent::Type::PERSISTER, m_id, m_currentTerm, "No previous state from persister");
         m_logger->logRaft(LogLevel::INFO, ev);
         return;
     }
-    std::string raftStateStr(raftStateBytes.begin(), raftStateBytes.end());
-    nlohmann::json j = nlohmann::json::parse(raftStateStr);
-    m_currentTerm       = j.value("Term",    0u);
-    m_votedFor          = j.value("VotedFor", -1);
-    m_lastIncludedIndex = 0;
-    m_lastIncludedTerm  = 0;
-    if (!snapshotBytes.empty())
+    else
     {
-        try {
-            std::string snapStr(snapshotBytes.begin(), snapshotBytes.end());
-            nlohmann::json snapJ = nlohmann::json::parse(snapStr);
-            m_lastIncludedIndex = snapJ.value("LastIncludedIndex", 0ull);
-            m_lastIncludedTerm  = snapJ.value("LastIncludedTerm",  0u);
-        } catch(...) {
-            LogEvent ev(LogEvent::Type::ERROR, m_id, m_currentTerm, "Failed to parse snapshot");
-            m_logger->logRaft(LogLevel::INFO, ev);
+        std::string raftStateStr(raftStateBytes.begin(), raftStateBytes.end());
+        nlohmann::json j = nlohmann::json::parse(raftStateStr);
+        m_currentTerm = j.value("Term",    0u);
+        m_votedFor = j.value("VotedFor", -1);
+        m_lastIncludedIndex = 0;
+        m_lastIncludedTerm  = 0;
+
+        if (!snapshotBytes.empty())
+        {
+            try 
+            {
+                std::string snapStr(snapshotBytes.begin(), snapshotBytes.end());
+                nlohmann::json snapJ = nlohmann::json::parse(snapStr);
+                m_lastIncludedIndex = snapJ.value("LastIncludedIndex", 0ull);
+                m_lastIncludedTerm  = snapJ.value("LastIncludedTerm",  0u);
+            } 
+            catch(...) 
+            {
+                LogEvent ev(LogEvent::Type::ERROR, m_id, m_currentTerm, "Failed to parse snapshot");
+                m_logger->logRaft(LogLevel::INFO, ev);
+            }
         }
+        m_lastApplied = m_lastIncludedIndex;
+
+        m_logs.clear();
+        auto dummy = std::make_shared<LogEntry>();
+        dummy->command = ""; dummy->term = m_lastIncludedTerm;
+        m_logs.push_back(dummy);
+
+        for (const auto& jsonEntry : j["Log"])
+        {
+            auto command = jsonEntry.value("Command", "");
+            auto term    = jsonEntry.value("Term",    0u);
+            m_logs.push_back(std::make_shared<LogEntry>(command, term));
+        }
+        LogEvent ev(LogEvent::Type::PERSISTER, m_id, m_currentTerm, "Restored state from persister");
+        m_logger->logRaft(LogLevel::INFO, ev);
     }
-    m_lastApplied = m_lastIncludedIndex;
-    m_logs.clear();
-    auto dummy = std::make_shared<LogEntry>();
-    dummy->command = ""; dummy->term = m_lastIncludedTerm;
-    m_logs.push_back(dummy);
-    for (const auto& jsonEntry : j["Log"])
-    {
-        auto command = jsonEntry.value("Command", "");
-        auto term    = jsonEntry.value("Term",    0u);
-        m_logs.push_back(std::make_shared<LogEntry>(command, term));
-    }
-    LogEvent ev(LogEvent::Type::PERSISTER, m_id, m_currentTerm, "Restored state from persister");
-    m_logger->logRaft(LogLevel::INFO, ev);
+    
 }
 
 bool Raft::helperNeedsSnapshot(size_t peerId)
@@ -721,16 +737,25 @@ void Raft::helperTriggerInstallSnapshot(size_t id)
         args.data              = m_persister->readSnapshot();
         args.done              = true;
     }
+
     m_threadPool.enqueue([this, id, args]() {
         InstallSnapshotReply reply;
         bool received = sendInstallSnapshotRPC(static_cast<int32_t>(id), args, reply);
         if (received)
         {
             std::lock_guard<std::mutex> lock(m_mu);
-            if (m_dead.load() || m_state != State::LEADER) return;
-            if (reply.term > m_currentTerm) { helperStepDownToFollower(reply.term); return; }
+            if (m_dead.load() || m_state != State::LEADER) 
+                return;
+
+            if (reply.term > m_currentTerm) 
+            { 
+                helperStepDownToFollower(reply.term); 
+                return; 
+            }
+
             m_matchIndex[id] = m_lastIncludedIndex;
             m_nextindex[id]  = m_lastIncludedIndex + 1;
+            
             LogEvent ev(LogEvent::Type::SNAPSHOT, m_id, m_currentTerm,
                 "Follower " + std::to_string(id) + " installed snapshot");
             m_logger->logRaft(LogLevel::INFO, ev);

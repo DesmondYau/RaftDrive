@@ -3,7 +3,8 @@
 #include <mutex>
 #include <memory>
 
-class Persister {
+class Persister 
+{
 public:
     Persister() = default;
 
