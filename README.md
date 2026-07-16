@@ -6,6 +6,7 @@
 A **fault-tolerant, distributed cloud file drive** built from scratch in C++, inspired by Google Drive. RaftDrive uses a self-implemented **Raft consensus algorithm** to provide a **distributed, strongly consistent** metadata store, with Amazon S3 (emulated locally via LocalStack) for object storage and a React frontend for file management.
 
 **[🚀 https://raftdrive.vercel.app](https://raftdrive.vercel.app)**
+
 <img width="1280" height="720" alt="Demo" src="https://github.com/user-attachments/assets/3ea3b496-ca57-4c64-be90-63531cf14ff8" />
 
 ---
