@@ -1,13 +1,11 @@
 
 
-
-
 # RaftDrive
 
 A fault-tolerant cloud file drive built from scratch in C++, inspired by Google Drive. RaftDrive uses a self-implemented Raft consensus algorithm to provide a **distributed, strongly-consistent** metadata store, with Amazon S3 (emulated locally via LocalStack) for object storage and a React frontend for file management.
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/889a239e-f817-4b2c-947f-f145e0b79062" width="850" controls></video>
+  <video src="https://github.com/user-attachments/assets/094ae6ca-faa9-4e30-9c44-813777af50d8" width="850" controls></video>
 </p>
 
 ---
